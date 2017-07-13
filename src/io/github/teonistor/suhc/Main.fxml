@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: grey;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="io.github.teonistor.suhc.Controller">
+  <columnConstraints>
+    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="401.0" />
+    <ColumnConstraints hgrow="NEVER" maxWidth="300.0" minWidth="10.0" prefWidth="200.0" />
+      <ColumnConstraints hgrow="NEVER" maxWidth="300.0" minWidth="10.0" prefWidth="199.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+      <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="ALWAYS" />
+      <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="NEVER" />
+    <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="NEVER" />
+      <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="NEVER" />
+  </rowConstraints>
+   <children>
+      <ImageView fx:id="photos" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Your name:   " GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+         <font>
+            <Font size="14.0" />
+         </font>
+         <GridPane.margin>
+            <Insets />
+         </GridPane.margin>
+      </Text>
+      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Email or Uni Username:   " GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
+         <font>
+            <Font size="14.0" />
+         </font>
+         <GridPane.margin>
+            <Insets />
+         </GridPane.margin>
+      </Text>
+      <Button fx:id="register" defaultButton="true" graphicTextGap="3.0" mnemonicParsing="false" prefWidth="95.0" text="Register" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Button>
+      <TextField fx:id="name" promptText="e.g. John Doe" text="Foo" GridPane.columnIndex="2" GridPane.rowIndex="2">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="email" promptText="e.g. ab3g17" style="-fx-background-color: black; -fx-text-inner-color: white;" text="ab3g17" GridPane.columnIndex="2" GridPane.rowIndex="3">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <Text fx:id="quotes" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="[Quotes go here.]" GridPane.columnIndex="1" GridPane.columnSpan="2">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Text>
+      <Text fx:id="prompt" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Register for mailing list:" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+         <font>
+            <Font name="System Bold" size="16.0" />
+         </font>
+      </Text>
+   </children>
+</GridPane>
