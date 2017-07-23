@@ -23,13 +23,17 @@ public class Main extends Application {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("Main.fxml"));
 		try {
 			Scene scene = new Scene((Parent)(loader.load()));
-			scene.setOnKeyTyped(e -> {
-				if (e.getCode().equals(KeyCode.ESCAPE))
+//			scene.setOnKeyTyped(e -> {
+//				if (e.getCode().equals(KeyCode.ESCAPE))
+//					stage.hide();
+//			});
+			stage.fullScreenProperty().addListener(e -> {
+				if (!stage.isFullScreen())
 					stage.hide();
 			});
 			
 			stage.setScene(scene);
-			stage.setFullScreen(true);
+//			stage.setFullScreen(true);
 			stage.show();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

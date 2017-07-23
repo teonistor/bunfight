@@ -7,7 +7,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: grey;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="io.github.teonistor.suhc.Controller">
+<GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: grey;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.teonistor.suhc.Controller">
   <columnConstraints>
     <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="401.0" />
     <ColumnConstraints hgrow="NEVER" maxWidth="300.0" minWidth="10.0" prefWidth="200.0" />
@@ -15,13 +15,17 @@
   </columnConstraints>
   <rowConstraints>
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
-      <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="ALWAYS" />
+      <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="NEVER" />
       <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="NEVER" />
     <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="NEVER" />
       <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="NEVER" />
   </rowConstraints>
    <children>
-      <ImageView fx:id="photos" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+      <Pane fx:id="photoFrame" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowSpan="5" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
+         <children>
+            <ImageView fx:id="photos" onMouseClicked="#photoChangeTrigger" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+         </children>
+      </Pane>
       <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Your name:   " GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
          <font>
             <Font size="14.0" />
