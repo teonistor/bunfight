@@ -25,13 +25,17 @@ import javafx.scene.text.Text;
 
 public class Controller {
 	
-	private static final String PROMPT_THANK = "Thank you!",
-							    PROMPT_REGISTER = "Register for mailing list:";
-	static final int PHOTO_DURATION_MILLI = 9696;
+	static final String PHOTOS_DIR = "Photos",
+						QUOTES_FILE = "Quotes.txt",
+						PROMPT_THANKS = "Thank you!",
+					    PROMPT_REGISTER = "Register for mailing list:",
+					    REGISTRAR_FILE = "members.csv";
+	static final int	PHOTO_DURATION_MILLI = 9696;
 	static final double PHOTO_FADE_NANO = 696969696;
 	static final double PROMPT_FADE_NANO = 333333333;
 
 	private Random random;
+	private Registrar registrar;
 
 	@FXML private TextField name, email;
 	@FXML private Text prompt, nameT, emailT;
@@ -41,10 +45,11 @@ public class Controller {
 	@FXML private Text quotes;
 	
 	private Iterator<Image> photoCache;
-	private AnimationTimer photoChange, photoTimer, registration, quotesMove;
+	private AnimationTimer photoChange, photoTimer, registrationAnimation, quotesMove;
 	
 	@FXML private void initialize() {
 		random = new Random();
+		registrar = new Registrar(REGISTRAR_FILE);
 
 		// Image position and size adjustments
 		photoFrame.heightProperty().addListener(this::adjustPhotosHeight);
@@ -60,7 +65,7 @@ public class Controller {
 			private Image next;
 			
 			{
-				files = new ArrayList<>(asList(new File("Photos").listFiles()));
+				files = new ArrayList<>(asList(new File(PHOTOS_DIR).listFiles()));
 				previous = new LinkedList<>();
 				next = null;
 				random = new Random();
@@ -148,7 +153,7 @@ public class Controller {
 			}
 		};
 		
-		registration = new AnimationTimer() {
+		registrationAnimation = new AnimationTimer() {
 			
 			static final short STOP = 1, DESCENT_ALL = 2, ASCENT_THANK = 4,
 							   DESCENT_THANK = 8, ASCENT_ALL = 16;
@@ -169,7 +174,7 @@ public class Controller {
 						opacity = (PROMPT_FADE_NANO - now + beginning) / PROMPT_FADE_NANO;
 						setRegistrationBlockOpacity(opacity);
 						if (opacity <= 0.0) {
-							prompt.setText(PROMPT_THANK);
+							prompt.setText(PROMPT_THANKS);
 							beginning = now;
 							status = ASCENT_THANK;
 						}
@@ -234,9 +239,11 @@ public class Controller {
 			   email = this.email.getText();
 		if (name.isEmpty() || email.isEmpty())
 			return;
-		registration.start();
-		
-		System.out.printf("Registration not implemented\t%s, %s\n", name, email);
+		registrationAnimation.start();
+		try {
+			registrar.register(name, email);
+		}
+		catch (RuntimeException e) {}
 	}
 
 	private void setRegistrationBlockOpacity(double opacity) {
