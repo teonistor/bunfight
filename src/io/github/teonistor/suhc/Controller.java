@@ -25,19 +25,23 @@ import javafx.scene.text.Text;
 
 public class Controller {
 	
-	private static final int PHOTO_DURATION_MILLI = 9696;
+	private static final String PROMPT_THANK = "Thank you!",
+							    PROMPT_REGISTER = "Register for mailing list:";
+	static final int PHOTO_DURATION_MILLI = 9696;
 	static final double PHOTO_FADE_NANO = 696969696;
+	static final double PROMPT_FADE_NANO = 333333333;
 
 	private Random random;
 
 	@FXML private TextField name, email;
+	@FXML private Text prompt, nameT, emailT;
 	@FXML private Button register;
 	@FXML private Pane photoFrame;
 	@FXML private ImageView photos;
-	@FXML private Text quotes, prompt;
+	@FXML private Text quotes;
 	
 	private Iterator<Image> photoCache;
-	private AnimationTimer photoChange, photoTimer, quotesMove;
+	private AnimationTimer photoChange, photoTimer, registration, quotesMove;
 	
 	@FXML private void initialize() {
 		random = new Random();
@@ -88,24 +92,6 @@ public class Controller {
 					}
 				} while (next == null);
 			}
-		};
-		
-//		AnimationTimer photo
-		
-		AnimationTimer quotesAnim = new AnimationTimer() {
-			DoubleProperty y;
-			
-			{
-				y = quotes.layoutYProperty();
-				System.out.println(y.getValue());
-			}
-			
-			public void handle(long now) {
-				System.out.println(now);
-				if (now>1000){
-				y.setValue(y.intValue() + now/1000000000);
-				System.out.println(y.getValue());
-			}}
 		};
 		
 		photoChange = new AnimationTimer() {
@@ -162,19 +148,104 @@ public class Controller {
 			}
 		};
 		
+		registration = new AnimationTimer() {
+			
+			static final short STOP = 1, DESCENT_ALL = 2, ASCENT_THANK = 4,
+							   DESCENT_THANK = 8, ASCENT_ALL = 16;
+			
+			private long beginning;
+			private short status = STOP;
+			
+			@Override public void handle(long now) {
+				double opacity;
+				
+				switch (status) {
+					case STOP:
+						beginning = now;
+						register.setDisable(true);
+						status = DESCENT_ALL;
+						return;
+					case DESCENT_ALL:
+						opacity = (PROMPT_FADE_NANO - now + beginning) / PROMPT_FADE_NANO;
+						setRegistrationBlockOpacity(opacity);
+						if (opacity <= 0.0) {
+							prompt.setText(PROMPT_THANK);
+							beginning = now;
+							status = ASCENT_THANK;
+						}
+						return;
+					case ASCENT_THANK:
+						opacity = ((double) now - beginning) / PROMPT_FADE_NANO;
+						prompt.setOpacity(opacity);
+						if (opacity >= 1.0) {
+							name.setText("");
+							email.setText("");
+							beginning = now;
+							status = DESCENT_THANK;
+						}
+						return;
+					case DESCENT_THANK:
+						opacity = (PROMPT_FADE_NANO - now + beginning) / PROMPT_FADE_NANO;
+						prompt.setOpacity(opacity);
+						if (opacity <= 0.0) {
+							prompt.setText(PROMPT_REGISTER);
+							beginning = now;
+							status = ASCENT_ALL;
+						}
+						return;
+					case ASCENT_ALL:
+						opacity = ((double) now - beginning) / PROMPT_FADE_NANO;
+						setRegistrationBlockOpacity(opacity);
+						if (opacity >= 1.0) {
+							register.setDisable(false);
+							status = STOP;
+							stop();
+						}
+				}
+			}
+		};
+		
+		quotesMove = new AnimationTimer() {
+			DoubleProperty y;
+			
+			{
+				y = quotes.layoutYProperty();
+				System.out.println(y.getValue());
+			}
+			
+			public void handle(long now) {
+				System.out.println(now);
+				if (now>1000){
+				y.setValue(y.intValue() + now/1000000000);
+				System.out.println(y.getValue());
+			}}
+		};
+		
 //		quotesAnim.start();
 		photoChangeTrigger();
 	}
 	
-	/** TODO
-	 * 
-	 */
-	@FXML private void onButtonRegister() {
-		System.out.println("Not implemented");
-	}
-	
 	@FXML private void photoChangeTrigger() {
 		photoChange.start();
+	}
+
+	@FXML private void onButtonRegister() {
+		String name = this.name.getText(),
+			   email = this.email.getText();
+		if (name.isEmpty() || email.isEmpty())
+			return;
+		registration.start();
+		
+		System.out.printf("Registration not implemented\t%s, %s\n", name, email);
+	}
+
+	private void setRegistrationBlockOpacity(double opacity) {
+		prompt.setOpacity(opacity);
+		nameT.setOpacity(opacity);
+		emailT.setOpacity(opacity);
+		name.setOpacity(opacity);
+		email.setOpacity(opacity);
+		register.setOpacity(opacity);
 	}
 
 	/**

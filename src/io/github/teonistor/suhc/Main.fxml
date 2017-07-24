@@ -26,7 +26,7 @@
             <ImageView fx:id="photos" onMouseClicked="#photoChangeTrigger" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
          </children>
       </Pane>
-      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Your name:   " GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+      <Text fx:id="nameT" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Your name:   " GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
          <font>
             <Font size="14.0" />
          </font>
@@ -34,7 +34,7 @@
             <Insets />
          </GridPane.margin>
       </Text>
-      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Email or Uni Username:   " GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
+      <Text fx:id="emailT" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Email or Uni Username:   " GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
          <font>
             <Font size="14.0" />
          </font>
@@ -42,7 +42,7 @@
             <Insets />
          </GridPane.margin>
       </Text>
-      <Button fx:id="register" defaultButton="true" graphicTextGap="3.0" mnemonicParsing="false" prefWidth="95.0" text="Register" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+      <Button fx:id="register" defaultButton="true" graphicTextGap="3.0" mnemonicParsing="false" onAction="#onButtonRegister" prefWidth="95.0" text="Register" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
          <font>
             <Font size="14.0" />
          </font>
