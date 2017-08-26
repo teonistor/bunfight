@@ -7,7 +7,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: grey;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.teonistor.suhc.Controller">
+<GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.teonistor.suhc.Controller">
   <columnConstraints>
     <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="401.0" />
     <ColumnConstraints hgrow="NEVER" maxWidth="300.0" minWidth="10.0" prefWidth="200.0" />
@@ -42,30 +42,26 @@
             <Insets />
          </GridPane.margin>
       </Text>
-      <Button fx:id="register" defaultButton="true" graphicTextGap="3.0" mnemonicParsing="false" onAction="#onButtonRegister" prefWidth="95.0" text="Register" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+      <Button fx:id="register" defaultButton="true" graphicTextGap="3.0" mnemonicParsing="false" onAction="#onButtonRegister" prefWidth="95.0" style="-fx-text-fill: white; -fx-background-color: #344556;" text="Register" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
          <font>
-            <Font size="14.0" />
+            <Font name="System Bold" size="14.0" />
          </font>
       </Button>
-      <TextField fx:id="name" promptText="e.g. John Doe" text="Foo" GridPane.columnIndex="2" GridPane.rowIndex="2">
+      <TextField fx:id="name" promptText="e.g. John Doe" style="-fx-background-color: #222222; -fx-text-inner-color: white;" GridPane.columnIndex="2" GridPane.rowIndex="2">
          <font>
             <Font size="14.0" />
          </font>
       </TextField>
-      <TextField fx:id="email" promptText="e.g. ab3g17" style="-fx-background-color: black; -fx-text-inner-color: white;" text="ab3g17" GridPane.columnIndex="2" GridPane.rowIndex="3">
+      <TextField fx:id="email" promptText="e.g. ab3g17" style="-fx-background-color: #222222; -fx-text-inner-color: white;" GridPane.columnIndex="2" GridPane.rowIndex="3">
          <font>
             <Font size="14.0" />
          </font>
       </TextField>
-      <Text fx:id="quotes" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="[Quotes go here.]" GridPane.columnIndex="1" GridPane.columnSpan="2">
-         <font>
-            <Font size="14.0" />
-         </font>
-      </Text>
-      <Text fx:id="prompt" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Register for mailing list:" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+      <Text fx:id="prompt" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Register for mailing list:" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
          <font>
             <Font name="System Bold" size="16.0" />
          </font>
       </Text>
+      <Pane fx:id="quotesFrame" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
    </children>
 </GridPane>

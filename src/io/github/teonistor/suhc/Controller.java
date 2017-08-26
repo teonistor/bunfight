@@ -1,27 +1,31 @@
 package io.github.teonistor.suhc;
 
-import static java.util.Arrays.asList;
+import static javafx.scene.control.Alert.AlertType.ERROR;
+import static javafx.scene.control.ButtonType.CLOSE;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 import java.util.Random;
 
 import javafx.animation.AnimationTimer;
+import javafx.animation.Interpolator;
+import javafx.animation.TranslateTransition;
 import javafx.beans.Observable;
-import javafx.beans.property.DoubleProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 public class Controller {
 	
@@ -40,12 +44,13 @@ public class Controller {
 	@FXML private TextField name, email;
 	@FXML private Text prompt, nameT, emailT;
 	@FXML private Button register;
-	@FXML private Pane photoFrame;
+	@FXML private Pane photoFrame, quotesFrame;
 	@FXML private ImageView photos;
-	@FXML private Text quotes;
+//	@FXML private AnchorPane quotesFrame;
 	
 	private Iterator<Image> photoCache;
-	private AnimationTimer photoChange, photoTimer, registrationAnimation, quotesMove;
+	private Iterator<Text> quotesCache;
+	private AnimationTimer photoChange, photoTimer, registrationAnimation, quotesChange;
 	
 	@FXML private void initialize() {
 		random = new Random();
@@ -58,47 +63,55 @@ public class Controller {
 		adjustPhotosHeight(null);
 		adjustPhotosWidth(null);
 		
-		photoCache = new Iterator<Image>() {
-			
-			private List<File> files;
-			private Queue<Integer> previous;
-			private Image next;
-			
-			{
-				files = new ArrayList<>(asList(new File(PHOTOS_DIR).listFiles()));
-				previous = new LinkedList<>();
-				next = null;
-				random = new Random();
-				cacheNext();
-			}
-			
-			public boolean hasNext() {
-				return next != null;
-			}
-
-			public Image next() {
-				Image next = this.next;
-				cacheNext();
-				return next;
-			}
-			
-			private void cacheNext() {
-				do {
-					while (previous.size() > files.size() / 2)
-						previous.remove();
-					Integer index;
-					do {
-						index = random.nextInt(files.size());
-					} while (previous.contains(index));
-					try {
-						next = new Image(new FileInputStream(files.get(index)));
-					} catch (FileNotFoundException e) {
-						e.printStackTrace();
+		photoCache = new CacheIterator<>(new File(PHOTOS_DIR).listFiles(),
+				file -> { try {
+					return new Image(new FileInputStream(file));
+				} catch (IOException e){
+					e.printStackTrace();
+					return null;
+				}}
+			);
+		/**
+		 * 
+		 */
+		quotesCache = new CacheIterator<String, Text>(() -> {
+				Collection<String> result = new ArrayList<>();
+				try (BufferedReader r = new BufferedReader(new FileReader(QUOTES_FILE))) {
+					String line, q = "";
+					while ((line = r.readLine()) != null) {
+						if (line.isEmpty()) {
+							if (!q.isEmpty()) {
+								result.add(q);
+								q = "";
+							}
+							continue;
+						}
+						if (q.isEmpty())
+							q = line;
+						else
+							q = String.format("%s\n%s", q, line);
 					}
-				} while (next == null);
-			}
-		};
+					if (!q.isEmpty())
+						result.add(q);
+				} catch (IOException e) {
+					complain("", "Error reading quotes from file", e);
+				}
+//				result.forEach(q -> {
+//					System.out.println(q);
+//					System.out.println("----------");
+//				});
+				return result;
+			}, Text::new);
 		
+//		quotesCache = new CacheIterator<>(((Function<String, String[]>) filename -> {
+//				return new String[4];
+//			}).apply(QUOTES_FILE),
+//				Text::new);
+		
+		/*...
+		 * ...
+		 * This is a fundamental and user-triggered animation
+		 */
 		photoChange = new AnimationTimer() {
 			
 			static final short STOP = 1, DESCENT = 2, ASCENT = 4;
@@ -136,6 +149,10 @@ public class Controller {
 			}
 		};
 		
+		/* Invisible animation that acts like a timer to trigger the displayed picture to
+		 * be changed at fixed intervals
+		 * This is a non-fundamental animation (it is triggered from within another animation)
+		 */
 		photoTimer = new AnimationTimer() {
 			
 			private long target;
@@ -153,6 +170,10 @@ public class Controller {
 			}
 		};
 		
+		/* Animation to fade in and out the registration form and the "Thank you" message
+		 * ....
+		 * This is a non-fundamental, user-triggered animation
+		 */
 		registrationAnimation = new AnimationTimer() {
 			
 			static final short STOP = 1, DESCENT_ALL = 2, ASCENT_THANK = 4,
@@ -210,23 +231,31 @@ public class Controller {
 			}
 		};
 		
-		quotesMove = new AnimationTimer() {
-			DoubleProperty y;
+		/* Animation to create and display a new, randomly-picked, quote, on screen,
+		 * at regular intervals.
+		 * This is a fundamental animation (it is started directly during setup)
+		 */
+		quotesChange = new AnimationTimer() {
+			final long spawnInterval = 4000000000l;
 			
-			{
-				y = quotes.layoutYProperty();
-				System.out.println(y.getValue());
-			}
+			private long lastMove = Long.MIN_VALUE;
+			
+//			{
+//				long n
+//			}
 			
 			public void handle(long now) {
-				System.out.println(now);
-				if (now>1000){
-				y.setValue(y.intValue() + now/1000000000);
-				System.out.println(y.getValue());
-			}}
+//				System.out.println(now + "  " + lastMove);
+				if (now > spawnInterval + lastMove) {
+					lateSetupQuote(quotesCache.next());
+					lastMove = now;
+//					System.out.println("Handled!");
+				}
+			}
 		};
 		
-//		quotesAnim.start();
+		// Launch the two fundamental animations
+		quotesChange.start();
 		photoChangeTrigger();
 	}
 	
@@ -243,9 +272,40 @@ public class Controller {
 		try {
 			registrar.register(name, email);
 		}
-		catch (RuntimeException e) {}
+		catch (RuntimeException e) {
+			complain("Error", "Could not save registration info", e);
+		}
+	}
+	
+	/**
+	 * Perform setup on a Text element representing a quote, which must be done immediately
+	 * before being displayed rather than at instantiation time. This includes setting its
+	 * color and width; listening for its vertical position so that it's removed when going
+	 * off-screen; adding a translation animation to scroll the text up the screen; and
+	 * adding the text to its actual container.
+	 * @param quote The Text element to be set up
+	 */
+	private void lateSetupQuote (Text quote) {
+		quote.setStyle("-fx-fill: white");
+		quote.setWrappingWidth(quotesFrame.getWidth());
+		quote.translateYProperty().addListener(o -> {
+			if (quote.getTranslateY() < -80)
+				quotesFrame.getChildren().remove(quote);
+		});
+		
+		TranslateTransition tt = new TranslateTransition(Duration.seconds(20), quote);
+		tt.setFromY(quotesFrame.getHeight() - 100);
+		tt.setInterpolator(Interpolator.LINEAR);
+		tt.setToY(-100);
+		tt.play();
+		
+		quotesFrame.getChildren().add(quote);
 	}
 
+	/**
+	 * Set the opacity of all UI elements that form the registration box in one go
+	 * @param opacity The new opacity of registration box UI elements
+	 */
 	private void setRegistrationBlockOpacity(double opacity) {
 		prompt.setOpacity(opacity);
 		nameT.setOpacity(opacity);
@@ -291,5 +351,18 @@ public class Controller {
 				photos.setLayoutY((imageRatio - frameRatio) / (2 * imageRatio * frameRatio) * photos.getFitWidth());
 			}
 		}
+	}
+	
+	/**
+	 * Utility method to show a blocking error message with the given information. The summary will be shown on the first line, followed by the given exception's string representation on the second line. The stack trace will be printed to stderr
+	 * @param title The title of the error dialog
+	 * @param summary The first line of the error summary
+	 * @param cause The exception that occurred
+	 */
+	static void complain (String title, String summary, Exception cause) {
+		cause.printStackTrace();
+		Alert a = new Alert(ERROR, String.format("%s\n(%s)", summary, cause), CLOSE);
+		a.setTitle(title);
+		a.showAndWait();
 	}
 }
