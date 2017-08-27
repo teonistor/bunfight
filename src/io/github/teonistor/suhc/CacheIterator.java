@@ -18,6 +18,8 @@ import java.util.function.Supplier;
  *
  * @param <S> Source type
  * @param <D> Destination type
+ * 
+ * This sotware --
  */
 public class CacheIterator<S,D> implements Iterator<D> {
 

@@ -2,6 +2,7 @@ package io.github.teonistor.suhc;
 
 import static javafx.scene.control.Alert.AlertType.ERROR;
 import static javafx.scene.control.ButtonType.CLOSE;
+import static javafx.util.Duration.millis;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,22 +26,44 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
-import javafx.util.Duration;
 
+/**
+ * Controller for the Bunfight app, tailored for SUHC
+ * @author Teodor Gherasim Nistor
+ *
+ * This software is provided under --
+ */
 public class Controller {
+	// No magic values were hurt in the making of this class ;)
 	
+	// String constants for working with external files. First two must match reality - super important
 	static final String PHOTOS_DIR = "Photos",
 						QUOTES_FILE = "Quotes.txt",
+					    REGISTRAR_FILE = "members.csv",
+					    
+	// String constants used in UI changes of registration form
 						PROMPT_THANKS = "Thank you!",
-					    PROMPT_REGISTER = "Register for mailing list:",
-					    REGISTRAR_FILE = "members.csv";
-	static final int	PHOTO_DURATION_MILLI = 9696;
-	static final double PHOTO_FADE_NANO = 696969696;
-	static final double PROMPT_FADE_NANO = 333333333;
+					    PROMPT_REGISTER = "Register for mailing list:";
+	
+	// Time between quotes spawn (nanoseconds)
+	static final long   QUOTE_INTVL = 3938373635L;
+	
+	// How long a photo stays on screen (milliseconds)
+	static final int 	PHOTO_INTVL = 9696,
+			
+	/* Left padding so quotes don't overlap photos; amount by which the start and end point of
+	 * quotes is shifted up to compensate for their height */
+						QUOTES_PADDING_LEFT = 30,
+						QUOTES_VERTICAL_SHIFT = -80;
+	
+	// How long fade transitions take for photo and registration prompt respectively (nanoseconds)
+	static final double PHOTO_FADE = 696969696,
+						PROMPT_FADE = 333333333,
+						
+	// Inverse speed of quotes (milliseconds / pixel)
+						QUOTES_SPEED_INV = 34.188;
 
-	private Random random;
-	private Registrar registrar;
-
+	// FXML-injected UI components
 	@FXML private TextField name, email;
 	@FXML private Text prompt, nameT, emailT;
 	@FXML private Button register;
@@ -48,10 +71,18 @@ public class Controller {
 	@FXML private ImageView photos;
 //	@FXML private AnchorPane quotesFrame;
 	
+	// Cache iterators to provide random photos and quotes, respectively
 	private Iterator<Image> photoCache;
 	private Iterator<Text> quotesCache;
+
+	// Utilities...
+	private Random random;
+	private Registrar registrar;
 	private AnimationTimer photoChange, photoTimer, registrationAnimation, quotesChange;
 	
+	/** Acts like a post-construction constructor. 
+	 * Initialises utilities and caches, sets up listeners etc
+	 */
 	@FXML private void initialize() {
 		random = new Random();
 		registrar = new Registrar(REGISTRAR_FILE);
@@ -62,6 +93,8 @@ public class Controller {
 		photos.imageProperty().addListener(this::adjustPhotosPosition);
 		adjustPhotosHeight(null);
 		adjustPhotosWidth(null);
+		
+		quotesFrame.heightProperty().addListener(o -> quotesFrame.getChildren().clear());
 		
 		photoCache = new CacheIterator<>(new File(PHOTOS_DIR).listFiles(),
 				file -> { try {
@@ -96,10 +129,6 @@ public class Controller {
 				} catch (IOException e) {
 					complain("", "Error reading quotes from file", e);
 				}
-//				result.forEach(q -> {
-//					System.out.println(q);
-//					System.out.println("----------");
-//				});
 				return result;
 			}, Text::new);
 		
@@ -128,7 +157,7 @@ public class Controller {
 						status = DESCENT;
 						return;
 					case DESCENT:
-						opacity = (PHOTO_FADE_NANO - now + beginning) / PHOTO_FADE_NANO;
+						opacity = (PHOTO_FADE - now + beginning) / PHOTO_FADE;
 						photos.setOpacity(opacity);
 						if (opacity <= 0.0) {
 							photos.setImage(photoCache.next());
@@ -138,7 +167,7 @@ public class Controller {
 						}
 						return;
 					case ASCENT:
-						opacity = ((double) now - beginning) / PHOTO_FADE_NANO;
+						opacity = ((double) now - beginning) / PHOTO_FADE;
 						photos.setOpacity(opacity);
 						if (opacity >= 1.0) {
 							status = STOP;
@@ -158,7 +187,7 @@ public class Controller {
 			private long target;
 			
 			@Override public void start() {
-				target = System.currentTimeMillis() + PHOTO_DURATION_MILLI;
+				target = System.currentTimeMillis() + PHOTO_INTVL;
 				super.start();
 			}
 			
@@ -192,7 +221,7 @@ public class Controller {
 						status = DESCENT_ALL;
 						return;
 					case DESCENT_ALL:
-						opacity = (PROMPT_FADE_NANO - now + beginning) / PROMPT_FADE_NANO;
+						opacity = (PROMPT_FADE - now + beginning) / PROMPT_FADE;
 						setRegistrationBlockOpacity(opacity);
 						if (opacity <= 0.0) {
 							prompt.setText(PROMPT_THANKS);
@@ -201,7 +230,7 @@ public class Controller {
 						}
 						return;
 					case ASCENT_THANK:
-						opacity = ((double) now - beginning) / PROMPT_FADE_NANO;
+						opacity = ((double) now - beginning) / PROMPT_FADE;
 						prompt.setOpacity(opacity);
 						if (opacity >= 1.0) {
 							name.setText("");
@@ -211,7 +240,7 @@ public class Controller {
 						}
 						return;
 					case DESCENT_THANK:
-						opacity = (PROMPT_FADE_NANO - now + beginning) / PROMPT_FADE_NANO;
+						opacity = (PROMPT_FADE - now + beginning) / PROMPT_FADE;
 						prompt.setOpacity(opacity);
 						if (opacity <= 0.0) {
 							prompt.setText(PROMPT_REGISTER);
@@ -220,7 +249,7 @@ public class Controller {
 						}
 						return;
 					case ASCENT_ALL:
-						opacity = ((double) now - beginning) / PROMPT_FADE_NANO;
+						opacity = ((double) now - beginning) / PROMPT_FADE;
 						setRegistrationBlockOpacity(opacity);
 						if (opacity >= 1.0) {
 							register.setDisable(false);
@@ -236,20 +265,12 @@ public class Controller {
 		 * This is a fundamental animation (it is started directly during setup)
 		 */
 		quotesChange = new AnimationTimer() {
-			final long spawnInterval = 4000000000l;
-			
 			private long lastMove = Long.MIN_VALUE;
 			
-//			{
-//				long n
-//			}
-			
 			public void handle(long now) {
-//				System.out.println(now + "  " + lastMove);
-				if (now > spawnInterval + lastMove) {
+				if (now > QUOTE_INTVL + lastMove) {
 					lateSetupQuote(quotesCache.next());
 					lastMove = now;
-//					System.out.println("Handled!");
 				}
 			}
 		};
@@ -287,16 +308,18 @@ public class Controller {
 	 */
 	private void lateSetupQuote (Text quote) {
 		quote.setStyle("-fx-fill: white");
-		quote.setWrappingWidth(quotesFrame.getWidth());
+		quote.setWrappingWidth(quotesFrame.getWidth() - QUOTES_PADDING_LEFT);
+		quote.setTranslateX(QUOTES_PADDING_LEFT);
 		quote.translateYProperty().addListener(o -> {
-			if (quote.getTranslateY() < -80)
+			if (quote.getTranslateY() <= QUOTES_VERTICAL_SHIFT)
 				quotesFrame.getChildren().remove(quote);
 		});
 		
-		TranslateTransition tt = new TranslateTransition(Duration.seconds(20), quote);
-		tt.setFromY(quotesFrame.getHeight() - 100);
+		double qfh = quotesFrame.getHeight();
+		TranslateTransition tt = new TranslateTransition(millis(qfh * QUOTES_SPEED_INV), quote);
+		tt.setFromY(quotesFrame.getHeight() + QUOTES_VERTICAL_SHIFT);
 		tt.setInterpolator(Interpolator.LINEAR);
-		tt.setToY(-100);
+		tt.setToY(QUOTES_VERTICAL_SHIFT);
 		tt.play();
 		
 		quotesFrame.getChildren().add(quote);

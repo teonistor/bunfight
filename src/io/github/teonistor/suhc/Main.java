@@ -11,29 +11,32 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-	public static void main(String[] args) {
+	/**
+	 * Entry point for SUHC Bunfight app
+	 * @param a Ignored
+	 */
+	public static void main(String[] a) {
 		launch();
 	}
-	
+
 	public void start(Stage stage) {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("Main.fxml"));
 			Scene scene = new Scene((Parent)(loader.load()));
-//			scene.setOnKeyTyped(e -> {
-//				if (e.getCode().equals(KeyCode.ESCAPE))
-//					stage.hide();
-//			});
+
+			// This app is meant for full-screen operation only.
 			stage.fullScreenProperty().addListener(e -> {
 				if (!stage.isFullScreen())
 					stage.hide();
 			});
 			
+			// Setup and display window
 			stage.setScene(scene);
-			stage.setMaximized(true);
-//			stage.setFullScreen(true);
+			stage.setFullScreen(true);
 			stage.getIcons().add(new Image(getClass().getResourceAsStream("Icon.png")));
 			stage.setTitle("SUHC Bunfight App");
 			stage.show();
+
 		} catch (Exception e) {
 			complain("Fatal Error", "Could not read FXML specification for main window.", e);
 		}
