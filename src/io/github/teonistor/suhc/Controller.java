@@ -29,13 +29,13 @@ import javafx.scene.text.Text;
 
 /**
  * Controller for the Bunfight app, tailored for SUHC
- * @author Teodor Gherasim Nistor
- *
- * This software is provided under --
+ * <p> No magic values were hurt in the making of this class ;)
+ * @author Copyright (C) 2017 Teodor Gherasim Nistor
+ * <p>
+ * This sotware is distributed under the terms of the GNU General Public License, version 3 or later; see www.gnu.org/licenses
  */
 public class Controller {
-	// No magic values were hurt in the making of this class ;)
-	
+
 	// String constants for working with external files. First two must match reality - super important
 	static final String PHOTOS_DIR = "Photos",
 						QUOTES_FILE = "Quotes.txt",

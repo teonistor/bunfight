@@ -14,12 +14,12 @@ import java.util.function.Supplier;
 
 /**
  * An iterator implementation which generates elements of the destination type from a source type collection, according to a given function, randomly and forever, without repeating the last n/2 elements (n being the size of the source collection)
- * @author Teodor Gherasim Nistor
+ * @author Copyright (C) 2017 Teodor Gherasim Nistor
+ * <p>
+ * This sotware is distributed under the terms of the GNU General Public License, version 3 or later; see www.gnu.org/licenses
  *
  * @param <S> Source type
  * @param <D> Destination type
- * 
- * This sotware --
  */
 public class CacheIterator<S,D> implements Iterator<D> {
 
