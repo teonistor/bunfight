@@ -1,5 +1,6 @@
 package io.github.teonistor.suhc;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static javafx.scene.control.Alert.AlertType.ERROR;
 import static javafx.scene.control.ButtonType.CLOSE;
 import static javafx.util.Duration.millis;
@@ -7,8 +8,8 @@ import static javafx.util.Duration.millis;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -69,7 +70,6 @@ public class Controller {
 	@FXML private Button register;
 	@FXML private Pane photoFrame, quotesFrame;
 	@FXML private ImageView photos;
-//	@FXML private AnchorPane quotesFrame;
 	
 	// Cache iterators to provide random photos and quotes, respectively
 	private Iterator<Image> photoCache;
@@ -93,7 +93,7 @@ public class Controller {
 		photos.imageProperty().addListener(this::adjustPhotosPosition);
 		adjustPhotosHeight(null);
 		adjustPhotosWidth(null);
-		
+
 		quotesFrame.heightProperty().addListener(o -> quotesFrame.getChildren().clear());
 		
 		photoCache = new CacheIterator<>(new File(PHOTOS_DIR).listFiles(),
@@ -104,12 +104,14 @@ public class Controller {
 					return null;
 				}}
 			);
-		/**
-		 * 
+
+		/* During the generator of the quotes cache, quotes file is read in line by line. Lines are
+		 * appended to a single block representing one quote, until an empty line is encountered, at
+		 * which point a new block starts to be constructed.
 		 */
 		quotesCache = new CacheIterator<String, Text>(() -> {
 				Collection<String> result = new ArrayList<>();
-				try (BufferedReader r = new BufferedReader(new FileReader(QUOTES_FILE))) {
+				try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(QUOTES_FILE), UTF_8))) {
 					String line, q = "";
 					while ((line = r.readLine()) != null) {
 						if (line.isEmpty()) {
@@ -132,33 +134,36 @@ public class Controller {
 				return result;
 			}, Text::new);
 		
-//		quotesCache = new CacheIterator<>(((Function<String, String[]>) filename -> {
-//				return new String[4];
-//			}).apply(QUOTES_FILE),
-//				Text::new);
-		
-		/*...
-		 * ...
+		/* Animation to fade out current photo and fade in next one
+		 * When transition finishes, photoTimer is started, which waits for a set amount of time
+		 * until photo is to change again.
 		 * This is a fundamental and user-triggered animation
 		 */
 		photoChange = new AnimationTimer() {
 			
+			// Status flags
 			static final short STOP = 1, DESCENT = 2, ASCENT = 4;
 			
 			private long beginning;
 			private short status = STOP;
 			
 			@Override public void handle(long now) {
-				double opacity;
 				
+				double opacity;
 				switch (status) {
+				
+					// If just now beginning, we need to fade out
 					case STOP:
 						beginning = now;
 						status = DESCENT;
 						return;
+						
+					// If fading out, calculate descending opacity based on current moment and moment of beginning
 					case DESCENT:
 						opacity = (PHOTO_FADE - now + beginning) / PHOTO_FADE;
 						photos.setOpacity(opacity);
+						
+						// Change image, rotate randomly within a set range, and start fading in
 						if (opacity <= 0.0) {
 							photos.setImage(photoCache.next());
 							photos.setRotate(random.nextDouble() * 10 - 5);
@@ -166,9 +171,13 @@ public class Controller {
 							status = ASCENT;
 						}
 						return;
+						
+					// If fading in, calculate ascending opacity based on current moment and moment of beginning of transition
 					case ASCENT:
 						opacity = ((double) now - beginning) / PHOTO_FADE;
 						photos.setOpacity(opacity);
+						
+						// Stop when full opacity was reached
 						if (opacity >= 1.0) {
 							status = STOP;
 							stop();
@@ -200,11 +209,14 @@ public class Controller {
 		};
 		
 		/* Animation to fade in and out the registration form and the "Thank you" message
-		 * ....
+		 * It uses the same principle as photoChange above, but with two phase cycles as the
+		 * registration form fades out, the "Thank you" message fades in, then the message fades
+		 * out and the form fades back in.
 		 * This is a non-fundamental, user-triggered animation
 		 */
 		registrationAnimation = new AnimationTimer() {
 			
+			// Status flags
 			static final short STOP = 1, DESCENT_ALL = 2, ASCENT_THANK = 4,
 							   DESCENT_THANK = 8, ASCENT_ALL = 16;
 			
@@ -280,10 +292,17 @@ public class Controller {
 		photoChangeTrigger();
 	}
 	
+	/**
+	 * Begin the photo changing animation. Called on user click and by photoTimer animation
+	 */
 	@FXML private void photoChangeTrigger() {
 		photoChange.start();
 	}
 
+	/**
+	 * Callback for user registration. Performs input validation and sanitization, and records
+	 * user details through the existing Registrar
+	 */
 	@FXML private void onButtonRegister() {
 		String name = this.name.getText(),
 			   email = this.email.getText();
